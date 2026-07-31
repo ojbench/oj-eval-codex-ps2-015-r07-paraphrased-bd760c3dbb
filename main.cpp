@@ -93,8 +93,14 @@ public:
 
         KeyRecord record = read_key(key_id);
         const int new_node = alloc_value_node(value);
-        auto [left_tree, right_tree] = split_less(record.root, value);
-        record.root = merge(merge(left_tree, new_node), right_tree);
+        auto [left_tree, ge_tree] = split_less(record.root, value);
+        auto [equal_tree, right_tree] = split_less_equal(ge_tree, value);
+        if (equal_tree != -1) {
+            record.root = merge(merge(left_tree, equal_tree), right_tree);
+            free_value(new_node);
+        } else {
+            record.root = merge(merge(left_tree, new_node), right_tree);
+        }
         write_key(key_id, record);
     }
 
